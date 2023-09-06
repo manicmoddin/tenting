@@ -23,6 +23,7 @@
 ///////////////////////////////////////////////////////
 
 // Libraies
+#define IR_USE_AVR_TIMER1
 #include <IRremote.hpp>
 
 // Constants
@@ -30,13 +31,13 @@
 
 // Chosen below as they have PWM contol to change brightness
 const int bedroomPin = 3;
-const int livingPin = 4;
-const int guylinePin = 9;
+const int livingPin = 5;
+const int guylinePin = 6;
 
 // Global Variables
 int lightBank = 1;      // Current selected bank of lights, 1 Bedroom, 2: living 3: guyline 4: Archway
 
-int lastCommand = millis();
+unsigned long lastCommand = millis();
 int commandTimeInterval = 500;
 
 int bedroomPower = 0;
@@ -299,5 +300,29 @@ void loop() {
             }
             lastCommand = millis();
         }            
+    }
+
+    if (bedroomPower == 1) {
+        analogWrite(bedroomPin, bedroomBrightness);
+    }
+
+    else {
+        digitalWrite(bedroomPin, 0);
+    }
+
+    if (livingPower == 1) {
+        analogWrite(livingPin, livingBrightness);
+    }
+
+    else {
+        digitalWrite(livingPin, 0);
+    }
+
+    if (guylinePower == 1) {
+        analogWrite(guylinePin, guylineBrightness);
+    }
+
+    else {
+        digitalWrite(guylinePin, 0);
     }
 }

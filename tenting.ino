@@ -36,10 +36,201 @@ const int guylinePin = 9;
 // Global Variables
 int lightBank = 1;      // Current selected bank of lights, 1 Bedroom, 2: living 3: guyline 4: Archway
 
+int lastCommand = millis();
+int commandTimeInterval = 500;
+
+int bedroomPower = 0;
+int livingPower = 0;
+int guylinePower = 0;
+int archwayPower = 0;
+
+int brightnessStep = 30;
+
+int bedroomBrightness = 150;
+int livingBrightness = 150;
+int guylineBrightness = 150;
+int archwayBrightness = 150;
+
 void setup(){
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(115200);
   IrReceiver.begin(IR_RECEIVE_PIN, ENABLE_LED_FEEDBACK);
+}
+
+void increaseBrightness() {
+    
+    switch (lightBank)
+    {
+    case 1:
+        Serial.println("Increasing Bedroom");
+        if (bedroomBrightness + brightnessStep >= 255){
+            bedroomBrightness = 255;
+        }
+        else {
+            bedroomBrightness = bedroomBrightness + brightnessStep;
+        }
+        Serial.print("Bedroom Brightness : ");
+        Serial.println(bedroomBrightness);
+        break;
+    
+    case 2:
+        Serial.println("Increasing Living");
+        if (livingBrightness + brightnessStep >= 255){
+            livingBrightness = 255;
+        }
+        else {
+            livingBrightness = livingBrightness + brightnessStep;
+        }
+        Serial.print("Living Brightness : ");
+        Serial.println(livingBrightness);
+        break;
+    
+    case 3:
+        Serial.println("Increasing Guyline");
+        if (guylineBrightness + brightnessStep >= 255){
+            guylineBrightness = 255;
+        }
+        else {
+            guylineBrightness = guylineBrightness + brightnessStep;
+        }
+        Serial.print("Guyline Brightness : ");
+        Serial.println(guylineBrightness);
+        break;
+
+    case 4:
+        Serial.println("Increasing Archway");
+        if (archwayBrightness + brightnessStep >= 255){
+            archwayBrightness = 255;
+        }
+        else {
+            archwayBrightness = archwayBrightness + brightnessStep;
+        }
+        Serial.print("Archway Brightness : ");
+        Serial.println(archwayBrightness);
+        break;
+
+    default:
+        break;
+    }
+}
+
+void decreaseBrightness() {
+    
+    switch (lightBank)
+    {
+    case 1:
+        Serial.println("Decreasing Bedroom");
+        if (bedroomBrightness - brightnessStep <= 0){
+            bedroomBrightness = 0;
+        }
+        else {
+            bedroomBrightness = bedroomBrightness - brightnessStep;
+        }
+        Serial.print("Bedroom Brightness : ");
+        Serial.println(bedroomBrightness);
+        break;
+    
+    case 2:
+        Serial.println("Decreasing Living");
+        if (livingBrightness - brightnessStep <= 0){
+            livingBrightness = 0;
+        }
+        else {
+            livingBrightness = livingBrightness - brightnessStep;
+        }
+        Serial.print("Living Brightness : ");
+        Serial.println(livingBrightness);
+        break;
+    
+    case 3:
+        Serial.println("Decreasing Guyline");
+        if (guylineBrightness - brightnessStep <= 0){
+            guylineBrightness = 0;
+        }
+        else {
+            guylineBrightness = guylineBrightness - brightnessStep;
+        }
+        Serial.print("Guyline Brightness : ");
+        Serial.println(guylineBrightness);
+        break;
+
+    case 4:
+        Serial.println("Decreasing Archway");
+        if (archwayBrightness - brightnessStep <= 0){
+            archwayBrightness = 0;
+        }
+        else {
+            archwayBrightness = archwayBrightness - brightnessStep;
+        }
+        Serial.print("Archway Brightness : ");
+        Serial.println(archwayBrightness);
+        break;
+
+    default:
+        break;
+    }
+}
+
+void changeBank(int bankNumber) {
+    lightBank = bankNumber;
+
+    // Serial.println("Selected a new light bank");
+
+    switch (lightBank)
+    {
+    case 1:
+        Serial.println("Selected Bedroom");
+        break;
+    
+    case 2:
+        Serial.println("Selected Living");
+        break;
+    
+    case 3:
+        Serial.println("Selected GuyLine");
+        break;
+
+    case 4:
+        Serial.println("Selected Archway");
+        break;
+
+    default:
+        break;
+    }
+}
+
+void togglePower() {
+    switch (lightBank)
+    {
+    case 1:
+        bedroomPower = ! bedroomPower;
+        Serial.print("Bedroom going to ");
+        Serial.println(bedroomPower);
+        break;
+    
+    case 2:
+        livingPower = ! livingPower;
+        Serial.print("Living going to ");
+        Serial.println(livingPower);
+        break;
+    
+    case 3:
+        guylinePower = ! guylinePower;
+        Serial.print("guyline going to ");
+        Serial.println(guylinePower);
+        break;
+
+    case 4:
+        archwayPower = ! archwayPower;
+        Serial.print("Archway going to ");
+        Serial.println(archwayPower);
+        break;
+
+    default:
+        break;
+    }
+
+
 }
 
 void loop() {
@@ -75,10 +266,38 @@ void loop() {
          * Finally, check the received data and perform actions according to the received command
          */
 
-        if (IrReceiver.decodedIRData.command == 0xA1) {
-            Serial.println("Button A1 pressed");
-        } else if (IrReceiver.decodedIRData.command == 0xA2) {
-            Serial.println("Button A2 pressed");
-        }
+        if (millis() - lastCommand >= commandTimeInterval) {
+            Serial.println("I can now run");
+
+        
+            if (IrReceiver.decodedIRData.command == 0xA1) {
+                changeBank(1);
+            }
+            
+            if (IrReceiver.decodedIRData.command == 0xA2) {
+                changeBank(2);
+            }
+            
+            if (IrReceiver.decodedIRData.command == 0xA3) {
+                changeBank(3);
+            }
+
+            if (IrReceiver.decodedIRData.command == 0xA4) {
+                changeBank(4);
+            }
+
+            if (IrReceiver.decodedIRData.command == 0x8E) {
+                togglePower();
+            }
+
+            if (IrReceiver.decodedIRData.command == 0x84) {
+                increaseBrightness();
+            }
+
+            if (IrReceiver.decodedIRData.command == 0x85) {
+                decreaseBrightness();
+            }
+            lastCommand = millis();
+        }            
     }
 }
